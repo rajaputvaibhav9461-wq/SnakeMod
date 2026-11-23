@@ -8,7 +8,7 @@ public class FcpHud {
     public static void register() {
         HudRenderCallback.EVENT.register((g, delta) -> {
             Minecraft mc = Minecraft.getInstance();
-            if (mc.player == null || mc.options.hideGui || mc.options.renderDebug) return;
+            if (mc.player == null || mc.options.hideGui) return;
 
             for (String id : new String[] { "fps", "coords", "ping" }) {
                 if (!SnakeConfig.isOn(id)) continue;
