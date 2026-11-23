@@ -12,11 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-/** Saari settings yahan. Naya feature = TOGGLES me ek line. */
 public class SnakeConfig {
     public record Toggle(String id, String label, String page, boolean def) { }
+    public record Elem(String id, String label, int defX, int defY, int w, int h) { }
 
-    public static final List<String> PAGES = List.of("Apple", "Display", "HUD");
+    public static final List<String> PAGES = List.of("Apple", "Display", "HUD", "Keys");
 
     public static final List<Toggle> TOGGLES = List.of(
             new Toggle("apple_hunger", "Hunger preview", "Apple", true),
@@ -31,10 +31,18 @@ public class SnakeConfig {
             new Toggle("ping", "Ping", "Display", true),
 
             new Toggle("player_hud", "Player HUD", "HUD", true),
-            new Toggle("inv_armor", "Armor", "HUD", true),
-            new Toggle("inv_items", "Inventory", "HUD", true),
-            new Toggle("inv_potion", "Potion effects", "HUD", true),
-            new Toggle("inv_totem", "Totem counter", "HUD", true)
+            new Toggle("inv_armor", "Inventory HUD: Armor", "HUD", true),
+            new Toggle("inv_totem", "Inventory HUD: Totem counter", "HUD", true),
+            new Toggle("inv_potion", "Inventory HUD: Potion effects", "HUD", true),
+            new Toggle("inv_items", "Inventory HUD: Inventory", "HUD", false)
+    );
+
+    public static final List<Elem> ELEMS = List.of(
+            new Elem("fps", "FPS: 120", 5, 5, 50, 10),
+            new Elem("coords", "XYZ: 0.0 64.0 0.0", 5, 16, 100, 10),
+            new Elem("ping", "Ping: 50 ms", 5, 27, 60, 10),
+            new Elem("shield_self", "Shield: OK", 5, 40, 70, 10),
+            new Elem("inv_hud", "Inventory HUD", 5, 60, 100, 100)
     );
 
     private static final Map<String, Boolean> bools = new HashMap<>();
@@ -61,6 +69,21 @@ public class SnakeConfig {
         save();
     }
 
+    private static Elem find(String id) {
+        for (Elem e : ELEMS) if (e.id().equals(id)) return e;
+        return null;
+    }
+
+    public static int posX(String id) {
+        Elem e = find(id);
+        return getInt("x_" + id, e == null ? 5 : e.defX());
+    }
+
+    public static int posY(String id) {
+        Elem e = find(id);
+        return getInt("y_" + id, e == null ? 5 : e.defY());
+    }
+
     private static Path file() {
         return FabricLoader.getInstance().getConfigDir().resolve("snakemod.properties");
     }
@@ -77,12 +100,12 @@ public class SnakeConfig {
             return;
         }
         for (String k : p.stringPropertyNames()) {
-            String v = p.getProperty(k);
+            String v = p.getProperty(k).trim();
             if (k.startsWith("b.")) {
-                bools.put(k.substring(2), Boolean.parseBoolean(v.trim()));
+                bools.put(k.substring(2), Boolean.parseBoolean(v));
             } else if (k.startsWith("i.")) {
                 try {
-                    ints.put(k.substring(2), Integer.parseInt(v.trim()));
+                    ints.put(k.substring(2), Integer.parseInt(v));
                 } catch (NumberFormatException ignored) { }
             }
         }
@@ -96,4 +119,4 @@ public class SnakeConfig {
             p.store(out, "SnakeMod settings");
         } catch (IOException ignored) { }
     }
-      }
+}
